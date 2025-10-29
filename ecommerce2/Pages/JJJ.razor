@@ -1,0 +1,49 @@
+﻿@page "/jjj"
+@inject HttpClient Http
+
+<h1>All Products</h1>
+
+@if (products == null)
+{
+    <p>Loading...</p>
+}
+else if (!products.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <div class="cart-itemss">
+        @foreach (var product in products)
+        {
+            <div class="product-card">
+                <img src="@product.ImageUrl" alt="@product.ProductName" />
+                <h4>@product.ProductName</h4>
+                <p>@product.Description</p>
+                <p>Price: ₹@product.Price</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ProductImage>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Http.GetFromJsonAsync<List<ProductImage>>("https://localhost:7180/api/ProductImage/getall");
+    }
+
+    public class ProductImage
+    {
+        public string ProductName { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public string ImageUrl { get; set; }
+    }
+}
+<h3>jjj</h3>
+
+@code {
+
+}

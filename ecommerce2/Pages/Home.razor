@@ -1,0 +1,35 @@
+﻿@page "/home"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<h1>Welcome to Dashboard 🎉</h1>
+
+
+
+@code {
+    private string message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "jwtToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await Http.GetAsync("api/User/get-profile");
+        if (response.IsSuccessStatusCode)
+        {
+            var data = await response.Content.ReadAsStringAsync();
+            message = "✅ You are authorized! " + data;
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

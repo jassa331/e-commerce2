@@ -1,0 +1,44 @@
+﻿@page "/admin-dashboard"
+@inject HttpClient Http
+
+<h3>Upload Product</h3>
+
+<div class="upload-box">
+    <InputFile OnChange="OnInputFileChange" />
+
+
+    <input placeholder="Product Name" @bind="productName" />
+    <input placeholder="Description" @bind="description" />
+    <input placeholder="Price" type="number" @bind="price" />
+    <button @onclick="UploadFile">Upload</button>
+</div>
+
+@code {
+    private IBrowserFile? file;
+    private string productName = "";
+    private string description = "";
+    private decimal price;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+    }
+
+    private async Task UploadFile()
+    {
+        if (file == null)
+            return;
+
+        using var content = new MultipartFormDataContent();
+        var streamContent = new StreamContent(file.OpenReadStream(1024 * 1024 * 15));
+        content.Add(streamContent, "file", file.Name);
+        content.Add(new StringContent(productName), "productName");
+        content.Add(new StringContent(description), "description");
+        content.Add(new StringContent(price.ToString()), "price");
+
+        var response = await Http.PostAsync("https://localhost:7180/api/ProductImage/upload", content);
+        var result = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine(result);
+    }
+}
