@@ -1,0 +1,64 @@
+﻿@page "/jjj"
+@inject HttpClient Http
+
+<h1>All Products</h1>
+
+<div class="topbar">
+    <input type="text" placeholder="Search products..." @bind="searchText" class="search-input" />
+    <button @onclick="SearchProducts">🔍</button>
+</div>
+
+@if (filteredProducts == null)
+{
+    <p>Loading...</p>
+}
+else if (!filteredProducts.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <div class="cart-itemss">
+        @foreach (var product in filteredProducts)
+        {
+            <div class="product-card">
+                <img src="@product.ImageUrl" alt="@product.ProductName" />
+                <h4>@product.ProductName</h4>
+                <p>@product.Description</p>
+                <p>Price: ₹@product.Price</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string searchText = "";
+    private List<ProductImage> allProducts = new();
+    private List<ProductImage> filteredProducts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allProducts = await Http.GetFromJsonAsync<List<ProductImage>>("https://localhost:7008/api/ProductImage/getall");
+        ;
+        filteredProducts = allProducts;
+    }
+
+    private void SearchProducts()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+            filteredProducts = allProducts;
+        else
+            filteredProducts = allProducts
+    .Where(p => p.ProductName.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+    .ToList();
+
+    }
+
+    public class ProductImage
+    {
+        public string ProductName { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Price { get; set; }
+        public string ImageUrl { get; set; } = "";
+    }
+}

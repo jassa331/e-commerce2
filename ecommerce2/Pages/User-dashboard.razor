@@ -1,0 +1,188 @@
+﻿@page "/user-dashboard"
+@inject HttpClient Http
+@inject NavigationManager NavManager
+<!-- HEADER -->
+<div class="topbar">
+    <div class="logo-containerr">
+        <img src="images/logo.png" alt="Logo" class="logoo">
+        <h3>𝓓𝓱𝓪𝓶𝓶𝓲's</h3>
+    </div>
+  
+    <div class="search-container">
+    <input type="text" placeholder="Search products..." @bind="searchText" class="search-input" />
+    <button class="JJDDD" @onclick="SearchProducts">🔍</button>
+</div>
+</div>
+<div class="topbar">
+
+<!-- NAV LINKS -->
+<nav class="nav-links">
+    <a href="home" class="JJDD">Home</a>
+    <a href="counter" class="JJDD">Counter</a>
+    <a href="electronics" class="JJDD">Electronics</a>
+    <a href="cr7" class="JJDD">CR7</a>
+    <a href="gpsmap" class="JJDD">Gpsmap</a>
+    <a href="login" class="JJDD">Login</a>
+    <a href="mypage" class="JJDD">My Page</a>
+    <a href="jjj" class="JJDD active">Products</a>
+</nav>
+</div>
+
+<!-- PRODUCT GRID -->
+
+@if (filteredProducts == null)
+{
+    <p>Loading products...</p>
+}
+else if (!filteredProducts.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <div class="electronics-pages">
+        <div class="login-boxx">
+            <h1 style="color: black;">All Products</h1>
+            <div class="cart-itemss">
+                @foreach (var product in filteredProducts)
+                {
+                    <div class="cart-item product-card">
+                        <img src="@product.ImageUrl" alt="@product.Name" />
+                        <h4>@product.Name</h4>
+                        <p class="desc">@product.Description</p>
+                        <p class="price">Price: ₹@product.Price</p>
+               
+                
+
+                        <button class="add-btn" @onclick="GoToCart">Add to cart 🛒</button>
+
+                @code {
+                    void GoToCart()
+                    {
+                        // Redirect to "jjjj" page
+                        NavManager.NavigateTo("/user_cart");
+                    }
+                }
+
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string searchText = "";
+    private List<ProductImage> allProducts = new();
+    private List<ProductImage> filteredProducts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // ✅ Make sure this port matches your running API (7008 in your case)
+            allProducts = await Http.GetFromJsonAsync<List<ProductImage>>("https://localhost:7008/api/ProductImage/getall");
+            filteredProducts = allProducts;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading products: {ex.Message}");
+        }
+    }
+
+    private void SearchProducts()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+            filteredProducts = allProducts;
+        else
+            filteredProducts = allProducts
+                .Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+    }
+
+    public class ProductImage
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Price { get; set; }
+        public string ImageUrl { get; set; } = "";
+    }
+}
+<style>
+     /* page wrapper - keeps max width so grid can fill space */ .electronics-pages {
+         max-width: 1700px;
+         margin: 0 auto;
+         padding: 1rem;
+         box-sizing: border-box;
+     }
+     /* GRID: side-by-side, responsive */
+
+     .cart-itemss {
+         display: grid !important; /* !important only for debugging/override potential bootstrap */
+         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+         gap: 50px;
+         align-items: start;
+         width: 100%;
+         box-sizing: border-box;
+     }
+     /* product card (merged with your product-card visual) */
+
+     .product-card {
+         border: 1px solid #ddd;
+         border-radius: 10px;
+         padding: 15px;
+         text-align: center;
+         transition: box-shadow 0.3s ease, transform 0.3s ease;
+         background-color: black;
+         box-sizing: border-box;
+     }
+
+         .product-card:hover {
+             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+             transform: translateY(-5px);
+         }
+
+         .product-card img {
+             max-width: 100%;
+             height: 150px;
+             object-fit: contain;
+             margin-bottom: 10px;
+         }
+
+         .product-card h4 {
+             font-size: 1rem;
+             margin: 5px 0;
+             height: 40px;
+             overflow: hidden;
+         }
+
+         .product-card .price {
+             font-weight: bold;
+             margin-bottom: 10px;
+             color: white;
+         }
+     /* buttons */
+
+     .add-btn {
+         background-color: white;
+         color: black;
+         border: none;
+         padding: 7px 12px;
+         border-radius: 5px;
+         cursor: pointer;
+     }
+
+         .add-btn:hover {
+             background-color: grey;
+         }
+     /* debugging outlines - remove after verifying */
+
+     .cart-items.debug-outline {
+         outline: 2px dashed rgba(0,0,0,0.15);
+     }
+
+     .cart-item.debug {
+         outline: 1px solid rgba(0,0,255,0.12);
+     }
+</style>
